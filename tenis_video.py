@@ -1,3 +1,9 @@
+// This file will assess the shots and performance from a video and its not intended to give live feedback from a stream
+// Live feedback from a stream is part of the bigger project and is left for a later stage
+
+// Code needs to differentiate between serve, normal game and volleys
+// Code needs to differentiate between play time and non play time (this will reduce analysis requirements)
+
 import cv2
 import mediapipe as mp
 import numpy as np
@@ -7,7 +13,7 @@ import textwrap
 import time
 
 # Load shot data from JSON
-with open('ball.json', 'r') as f:
+with open('text.json', 'r') as f:
     shot_data = json.load(f)
 
 # Initialize MediaPipe Pose
@@ -17,9 +23,11 @@ pose = mp_pose.Pose(
     min_tracking_confidence=0.5
 )
 
+// Only one file to be saved on the location, filename will be taken directly from the source
+
 # Open the video files
-process_video_path = '/Users/thorfinn/Developer/tidbit-script/final_ball.mov'
-display_video_path = 'final_ball.mp4'
+process_video_path = '/Users/thorfinn/Developer/tidbit-script/final_ball.mov' // video to be assessed, in other words without any processing
+display_video_path = 'final_ball.mp4' // processed video
 
 # Open processing video (lower res)
 process_cap = cv2.VideoCapture(process_video_path)
@@ -34,7 +42,7 @@ display_width = int(display_cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 display_height = int(display_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
 # List to store all processed frames
-processed_frames = []
+processed_frames = [] // some filter can be applied to only store frames during play time
 
 # Animation variables
 last_shot_time = None
@@ -141,39 +149,43 @@ while process_cap.isOpened() and display_cap.isOpened():
         rgb_frame = cv2.cvtColor(process_frame, cv2.COLOR_BGR2RGB)
         results = pose.process(rgb_frame)
 
-        if results.pose_landmarks:
-            # Get the head landmark (landmark 0 is the top of the head)
-            head = results.pose_landmarks.landmark[0]
-            # Scale coordinates to display resolution
-            head_x = int(head.x * display_width)
-            head_y = int(head.y * display_height)
-            last_head = (head_x, head_y)
-
-    # Draw the arrow and name if we have a head position
-    if last_head is not None:
-        head_x, head_y = last_head
-        arrow_height = 30  # Increased from 20 to 30
-        arrow_width = 45   # Increased from 30 to 45
-        arrow_tip_y = max(0, head_y - 110)  # Changed from -60 to -110 to move arrow 50px higher
-        # Triangle points for the arrow
-        pt1 = (head_x, arrow_tip_y + arrow_height)  # tip
-        pt2 = (head_x - arrow_width // 2, arrow_tip_y)  # left
-        pt3 = (head_x + arrow_width // 2, arrow_tip_y)  # right
-        pts = np.array([pt1, pt2, pt3], np.int32).reshape((-1, 1, 2))
-        cv2.fillPoly(display_frame, [pts], (0, 0, 255))  # Red arrow
-        # Draw the name above the arrow with black border
-        font = cv2.FONT_HERSHEY_SIMPLEX
-        text = "farza"
-        text_size = cv2.getTextSize(text, font, 2.5, 6)[0]  # Reduced from 3.0 to 2.5
-        text_x = head_x - text_size[0] // 2
-        text_y = arrow_tip_y - 10
-        # Black border
-        cv2.putText(display_frame, text, (text_x, text_y), font, 2.5, (0, 0, 0), 15, cv2.LINE_AA)  # Reduced from 3.0 to 2.5
-        # White fill
-        cv2.putText(display_frame, text, (text_x, text_y), font, 2.5, (255, 255, 255), 6, cv2.LINE_AA)  # Reduced from 3.0 to 2.5
-
+    timestamp_of_outcome, serve, forehand, backhand, forehand_volley, backhand_volley, forehand_normal, backhand_normal, points_won, points_lost, shots_in, shots_out, winners, forced_errors, unforced_errors, feedback
+    
     # Calculate current shot statistics
-    current_shots_made = 0
+    serve = 0
+    forehand = 0
+    backhand = 0
+    forehand_volley = 0
+    backhand_volley = 0
+    forehand_normal = 0
+    backhand_normal = 0
+    points_won = 0
+    points_lost = 0
+    serve_in = 0
+    serve_out = 0
+    shot_in = 0
+    shout_out = 0
+    winner = 0
+    forced_error = 0
+    unforced_error = 0
+    
+    current_serves = 0
+    current_forehands = 0
+    current_backhands = 0
+    current_forehand_volleys = 0
+    current_backhand_volleys = 0
+    current_forehands_normal = 0
+    current_backhands_normal = 0
+    current_points_won = 0
+    current_points_lost = 0
+    current_serves_in = 0
+    current_serves_out = 0
+    current_shots_in = 0
+    current_shouts_out = 0
+    current_winners = 0
+    current_forced_errors = 0
+    current_unforced_errors = 0
+    
     current_shots_missed = 0
     current_feedback = None
     
@@ -273,7 +285,7 @@ while process_cap.isOpened() and display_cap.isOpened():
     processed_frames.append(display_frame.copy())
 
     # Display the frame (optional)
-    cv2.imshow('Basketball Player Detection', display_frame)
+    cv2.imshow('Tenis Player Detection', display_frame)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
