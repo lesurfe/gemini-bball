@@ -6,6 +6,15 @@
 // YES YOU CAN USE THE GEMINI API FOR THIS
 // I WAS JUST TOO LAZY TO DO IT MYSELF
 
+// This file overlays text on top of the video to reflect the status of an event
+// Inputs are basketball related
+// Inputs are timestamp_of_outcome, result, shot_type, total_shots_made_so_far, total_shots_missed_so_far, total_layups_made_so_far and feedback
+
+// Any eventual software will have to assess the event, keep a register of the events and provide feedback
+// For tennis could be like timestamp_of_outcome, serve, drive, backhand, drive_volley, backhand_volley, drive_normal, backhand_normal, shots_in, shots_out, winners, forced_errors, unforced_errors, feedback
+
+// A deeper analysis can be made to provide a recommendations to the player in order to improve his/hers game
+
 {
     "shots": [
       {
